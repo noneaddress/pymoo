@@ -11,21 +11,29 @@ from pymoo.operators.repair.bounds_repair import repair_clamp
 
 
 def cross_sbx(X, xl, xu, eta, prob_var, prob_bin, eps=1.0e-14):
+    '''
+    xl: x的下界
+    xu: x的上界
+    prob_var: 变异概率
+    
+    '''
     n_parents, n_matings, n_var = X.shape
+    # 父代个体数，交配数，变量数
 
     # the probability of a crossover for each of the variables
     cross = np.random.random((n_matings, n_var)) < prob_var
-
+    # bool矩阵，判断哪些交配对的哪些变量需要交叉？
+# 不断更新cross矩阵，排除不进行交叉的变量
     # when solutions are too close -> do not apply sbx crossover
     too_close = np.abs(X[0] - X[1]) <= eps
 
     # disable if two individuals are already too close
     cross[too_close] = False
 
-    # disable crossover when lower and upper bound are identical
+    # disable crossover when lower and upper bound are identical（上下界相同）
     cross[:, xl == xu] = False
 
-    # assign y1 the smaller and y2 the larger value
+    # assign y1 the smaller and y2 the larger value（X中的最大/小值）
     y1 = np.min(X, axis=0)[cross]
     y2 = np.max(X, axis=0)[cross]
 
